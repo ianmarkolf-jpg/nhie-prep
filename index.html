@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a2540">
+<title>NHIE Drill — Cream City Pro</title>
+<style>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f7f7f5;
+    --bg-tertiary: #efefe9;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.25);
+    --success: #3b6d11;
+    --success-bg: #eaf3de;
+    --danger: #a32d2d;
+    --danger-bg: #fcebeb;
+    --warning: #854f0b;
+    --info: #185fa5;
+    --info-bg: #e6f1fb;
+    --accent: #0a2540;
+    --gold: #c9a449;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #232323;
+      --bg-tertiary: #2c2c2a;
+      --text-primary: #f5f5f0;
+      --text-secondary: #b4b2a9;
+      --text-tertiary: #888780;
+      --border: rgba(255,255,255,0.15);
+      --border-strong: rgba(255,255,255,0.3);
+      --success: #97c459;
+      --success-bg: rgba(151,196,89,0.15);
+      --danger: #f09595;
+      --danger-bg: rgba(240,149,149,0.15);
+      --warning: #fac775;
+      --info: #85b7eb;
+      --info-bg: rgba(133,183,235,0.15);
+      --accent: #4a8eda;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app-shell {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 80px;
+    min-height: 100vh;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+  }
+  .brand .accent { color: var(--gold); }
+  .version { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
+  h2 { font-size: 18px; font-weight: 500; margin: 0 0 0.5rem; }
+  .sub { font-size: 13px; color: var(--text-secondary); margin: 0 0 1.5rem; }
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .mode-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: border-color 0.15s, transform 0.1s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-card:hover { border-color: var(--border-strong); }
+  .mode-card:active { transform: scale(0.98); }
+  .mode-card .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .mode-card .num { font-size: 28px; font-weight: 500; line-height: 1; }
+  .mode-card.reset { background: transparent; border: 1px solid var(--border); }
+  .mode-card.reset .num { font-size: 14px; margin-top: 8px; font-weight: 400; }
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .stat {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+  }
+  .stat .lbl { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .stat .val { font-size: 20px; font-weight: 500; }
+  .gap-list {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .gap-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gap-row:last-child { border-bottom: none; }
+  .gap-pct { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .gap-pct.weak { color: var(--danger); }
+  .gap-pct.ok { color: var(--warning); }
+  .gap-pct.strong { color: var(--success); }
+  .question-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .qmeta {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .qtext {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+  }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.875rem 1rem;
+    margin-bottom: 8px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+    font-family: inherit;
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .choice:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    border-color: var(--border-strong);
+  }
+  .choice:active:not(:disabled) { transform: scale(0.99); }
+  .choice.correct {
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: var(--success);
+    font-weight: 500;
+  }
+  .choice.wrong {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  .choice:disabled { cursor: default; }
+  .explanation {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-top: 0.75rem;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .explanation .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 1rem;
+  }
+  button.primary, button.ghost {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button.primary {
+    background: var(--accent);
+    color: white;
+    border: 1px solid var(--accent);
+  }
+  button.primary:hover { opacity: 0.9; }
+  button.primary:active { transform: scale(0.98); }
+  button.ghost {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+  }
+  button.ghost:hover { background: var(--bg-secondary); }
+  .progress {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--bg-secondary);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .results { text-align: center; padding: 2rem 0; }
+  .results .score { font-size: 56px; font-weight: 500; margin-bottom: 0.5rem; line-height: 1; }
+  .results .score.pass { color: var(--success); }
+  .results .score.fail { color: var(--danger); }
+  .results .breakdown { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .review-item {
+    text-align: left;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1rem;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .review-item .q { font-weight: 500; margin-bottom: 6px; color: var(--text-primary); }
+  .review-item .a { color: var(--text-secondary); margin-bottom: 2px; }
+  .review-item .a strong { color: var(--text-primary); font-weight: 500; }
+  .review-section-header {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  @media (max-width: 480px) {
+    .app-shell { padding: 16px 12px 60px; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .stats-bar .stat:last-child { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="header">
+    <div class="brand">Cream City Pro <span class="accent">·</span> NHIE Drill</div>
+    <div class="version">v1 · 50q</div>
+  </div>
+
+  <div id="screen-home">
+    <h2>Drill mode</h2>
+    <p class="sub">Tagged by EBPHI task. Tracks gaps. Persists locally.</p>
+    <div class="stats-bar" id="stats-bar"></div>
+    <div class="gap-list" id="gap-list"></div>
+    <div class="mode-grid">
+      <div class="mode-card" data-mode="quick10">
+        <div class="label">Quick drill</div>
+        <div class="num">10</div>
+        <div class="label" style="margin-top:4px;">Random mix</div>
+      </div>
+      <div class="mode-card" data-mode="weak">
+        <div class="label">Weak areas</div>
+        <div class="num">15</div>
+        <div class="label" style="margin-top:4px;">Lowest accuracy first</div>
+      </div>
+      <div class="mode-card" data-mode="mixed25">
+        <div class="label">Timed sim</div>
+        <div class="num">25</div>
+        <div class="label" style="margin-top:4px;">25 min cap</div>
+      </div>
+      <div class="mode-card reset" data-mode="reset">
+        <div class="label">Reset</div>
+        <div class="num">Clear all stats</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-quiz" style="display:none;">
+    <div class="progress" id="progress-text"></div>
+    <div class="progress-bar"><div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div></div>
+    <div class="question-card" id="question-card" style="margin-top: 1rem;"></div>
+  </div>
+
+  <div id="screen-results" style="display:none;">
+    <div class="results">
+      <div class="score" id="score-display"></div>
+      <div class="breakdown" id="score-breakdown"></div>
+      <div id="review-section"></div>
+      <div class="controls" style="justify-content:center;">
+        <button class="ghost" id="back-home">Back to menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const QUESTIONS = [
+    { id: 1, domain: 1, task: 5, topic: "Electrical Terminology", q: "Which of the following is NOT a term used in the grounding and bonding of an electrical system?", choices: ["Overcurrent Protection Device", "Intersystem Bonding Terminal", "Ufer Ground", "Grounding Electrode Conductor"], correct: 0, exp: "Overcurrent Protection Devices (breakers/fuses) interrupt current flow on individual circuits — they are not part of grounding/bonding. The Intersystem Bonding Terminal bonds low-voltage systems to service ground. A Ufer Ground is a type of grounding electrode (rebar in footings). The GEC connects the grounding electrode to the service." },
+    { id: 2, domain: 1, task: 5, topic: "SOP Electrical", q: "Per the SOP, an inspector must inspect everything EXCEPT:", choices: ["Testing smoke and CO alarms, security systems, and signaling devices", "Service grounding", "GFCIs and AFCIs", "Service drop"], correct: 0, exp: "The SOP requires inspection of service drop, service grounding, GFCIs, and AFCIs. Smoke/CO alarms must be DESCRIBED (presence/absence) but not TESTED. Security and signaling systems are out of scope entirely." },
+    { id: 3, domain: 1, task: 5, topic: "Wire Gauge", q: "What is the smallest wire gauge typically used in residential branch circuit wiring?", choices: ["#10 AWG", "#12 AWG", "#14 AWG", "#16 AWG"], correct: 2, exp: "#14 AWG is the smallest wire used in residential house wiring (15-amp circuits). Larger AWG numbers = smaller wire diameter. 4/0 is typically the largest." },
+    { id: 4, domain: 1, task: 5, topic: "Aluminum Wiring", q: "Solid-conductor aluminum branch circuit wiring is primarily a concern because:", choices: ["It cannot carry as much current as copper", "Connections can loosen and overheat at terminations", "It cannot be used with modern breakers", "It is no longer manufactured"], correct: 1, exp: "Aluminum expands/contracts more than copper, oxidizes, and can creep at termination points — leading to loose connections, arcing, and fire hazards. Used in residential branch circuits roughly 1965-1973. Remediation typically involves COPALUM crimps or AlumiConn connectors at all terminations." },
+    { id: 5, domain: 1, task: 5, topic: "Known Problem Panels", q: "Which of these panel brands is known for stab-lok breakers that fail to trip?", choices: ["Square D", "Federal Pacific", "Siemens", "Eaton"], correct: 1, exp: "Federal Pacific Electric (FPE) Stab-Lok breakers have documented failure-to-trip rates that create fire hazards. Zinsco/Sylvania panels share similar issues with breaker failure and bus deterioration. Both should be flagged for replacement." },
+    { id: 6, domain: 1, task: 7, topic: "Vent Types", q: "Wall vent furnaces use what type of vent?", choices: ["PVC or ABS", "Type BW", "Type L", "Single wall"], correct: 1, exp: "Type BW vents are specifically designed for wall furnaces (the W stands for wall). Type B is for general gas appliances. Type L is for oil/gas with higher stack temperatures. PVC/ABS is for high-efficiency condensing furnaces only." },
+    { id: 7, domain: 1, task: 7, topic: "Vent Clearance", q: "The minimum clearance to combustible material for a single-wall vent connector serving a gas appliance is:", choices: ["18\"", "6\"", "1\"", "2\""], correct: 1, exp: "Single-wall vent connectors require 6\" clearance to combustibles. Type B vents only need 1\". Single-wall stove pipe requires 18\" clearance. Insulation sleeves through attics must extend 2\" above insulation." },
+    { id: 8, domain: 1, task: 7, topic: "Mid-Efficiency Furnace", q: "Which list of components are you most likely to find on a mid-efficiency furnace?", choices: ["Barometric damper, natural draft venting, indoor air handler", "Condensate management, PVC/ABS venting, closed combustion", "Type B vent pipe, mechanical draft, indoor air handler", "Condensate management, indoor air handler, exterior condenser"], correct: 2, exp: "Mid-efficiency furnaces (~80% AFUE) use Type B vents and mechanical draft (induced-draft fan). High-efficiency (88%+ AFUE) furnaces produce condensate, use PVC/ABS venting, and have closed combustion chambers. The exterior condenser is part of an AC system, not a furnace." },
+    { id: 9, domain: 1, task: 7, topic: "Ignition Devices", q: "What device is often referred to as a 'glow stick' and serves as the ignition source in a gas-fired furnace?", choices: ["Intermittent-pilot igniter", "Thermopile", "Thermocouple", "Hot-surface igniter"], correct: 3, exp: "The hot-surface igniter (silicon carbide or silicon nitride element) glows red-hot to ignite the gas burner — the 'glow stick'. Intermittent-pilot igniters use spark. Thermocouples and thermopiles are SAFETY devices that detect pilot flame and keep the gas valve open — not ignition sources." },
+    { id: 10, domain: 1, task: 7, topic: "Boiler PRV", q: "The pressure relief valve on a closed hot water boiler heating system prevents pressure from exceeding approximately:", choices: ["12 psi", "150 psi", "60 psi", "30 psi"], correct: 3, exp: "Boiler PRVs are rated at 30 psi. Don't confuse with hot water tank T&P valves, which are rated at 150 psi. Normal boiler operating range is 12-25 psi." },
+    { id: 11, domain: 1, task: 7, topic: "High-Efficiency Furnace", q: "A high-efficiency condensing furnace will have all of the following EXCEPT:", choices: ["Closed combustion chamber", "PVC or ABS vent piping", "Condensate drain", "Type B vent"], correct: 3, exp: "High-efficiency furnaces extract so much heat that flue gases are cool enough for plastic venting (PVC/ABS) — Type B metal vent would not be used. They have closed combustion (sealed from indoor air) and produce condensate as a combustion byproduct." },
+    { id: 12, domain: 1, task: 7, topic: "Combustion Byproducts", q: "Which of the following is NOT a normal byproduct of complete combustion of natural gas?", choices: ["H2O (water vapor)", "CO2 (carbon dioxide)", "CO (carbon monoxide)", "Heat"], correct: 2, exp: "Carbon monoxide (CO) is a byproduct of INCOMPLETE combustion and indicates a problem. Complete combustion of methane produces CO2 + H2O + heat. CO at any meaningful level in flue gases is a serious safety issue." },
+    { id: 13, domain: 1, task: 7, topic: "Furnace Efficiency", q: "Which abbreviation is used when describing the efficiency rating of a furnace?", choices: ["SEER", "AFUE", "HSPF", "EER"], correct: 1, exp: "AFUE (Annual Fuel Utilization Efficiency) measures furnace efficiency. SEER = AC seasonal efficiency. EER = AC at peak conditions. HSPF = heat pump heating efficiency." },
+    { id: 14, domain: 1, task: 7, topic: "Heat Transfer Units", q: "What unit of measurement best describes the transfer of heat through a material?", choices: ["BTU", "U-value", "R-value", "Watts"], correct: 1, exp: "U-value (or U-factor) measures heat TRANSFER through a material (lower = better insulating). R-value measures RESISTANCE to heat flow (higher = better). They're inverses: U = 1/R. BTU is a unit of heat energy." },
+    { id: 15, domain: 1, task: 6, topic: "Refrigerant Cycle", q: "In a residential split-system air conditioner, the refrigerant is changed from a high-pressure liquid to a low-pressure liquid by the:", choices: ["Compressor", "Evaporator", "Expansion device (TXV or capillary tube)", "Condenser"], correct: 2, exp: "The expansion device (thermostatic expansion valve or capillary tube) drops refrigerant pressure right before the evaporator, causing it to flash to a cold mixture. Compressor: low-pressure gas to high-pressure gas. Condenser: high-pressure gas to high-pressure liquid. Evaporator: low-pressure liquid to low-pressure gas." },
+    { id: 16, domain: 1, task: 6, topic: "Heat Pump Testing", q: "A heat pump should NOT be tested in cooling mode if outdoor temperatures have been below approximately:", choices: ["32°F for 24 hours", "60°F for 24 hours", "45°F for 12 hours", "70°F for 12 hours"], correct: 1, exp: "Most manufacturers recommend not running a heat pump (or AC) in cooling mode if outdoor temps have been below ~60°F for 24 hours, as oil migration can damage the compressor on startup." },
+    { id: 17, domain: 1, task: 8, topic: "Attic Moisture Control", q: "What is the most effective means of limiting moisture and mold growth in an attic?", choices: ["Air sealing the attic from the conditioned space", "Increasing the amount of airflow through the attic", "Heating the attic", "Using a sealant at the sheathing and rafters"], correct: 0, exp: "Air sealing PREVENTS moisture-laden warm air from entering the attic in the first place — this is the upstream solution. Ventilation helps remove moisture but doesn't stop it from arriving. Always pick prevention over mitigation when both are offered." },
+    { id: 18, domain: 1, task: 9, topic: "ERV vs HRV", q: "Which mechanical device provides ventilation by using heat from stale exhaust air to preheat fresh incoming air, while also capturing humidity to maintain internal humidity levels?", choices: ["Local/Spot Exhaust Fan", "Energy Recovery Ventilator (ERV)", "Heat Recovery Ventilator (HRV)", "Whole-House Ventilation"], correct: 1, exp: "ERV transfers BOTH heat AND humidity (latent + sensible energy). HRV transfers heat only. The 'humidity' keyword in the question is the ERV signal. HRVs are better in cold/dry climates; ERVs in humid or mixed climates." },
+    { id: 19, domain: 1, task: 9, topic: "Dryer Venting", q: "Which of the following is a defect commonly found with clothes dryer venting?", choices: ["Metal duct used instead of plastic", "Vent terminating outside", "Plastic flexible duct", "Maximum 25-foot run"], correct: 2, exp: "Plastic flexible (vinyl) dryer duct is a fire hazard — lint accumulates and can ignite. Codes require rigid or semi-rigid metal duct. Plastic flex is the defect. Length should be 25 feet maximum, reduced for elbows." },
+    { id: 20, domain: 1, task: 10, topic: "Polybutylene", q: "Which best describes polybutylene piping?", choices: ["Bluish-gray; no longer permissible; microfractures from oxidants/disinfectants in water", "Milky-white; cannot be installed within 18\" of water heater", "Yellowish; cannot be installed within 18\" of water heater; prone to freezing", "White; not permissible for hot water lines; prone to freezing"], correct: 0, exp: "Polybutylene (PB) is bluish-gray, used 1970s-90s, no longer permissible. Common oxidants like chlorine cause microfractures and catastrophic failure. PVC = white, cold only. CPVC = yellowish, hot+cold. PEX = various colors, common milky white." },
+    { id: 21, domain: 1, task: 10, topic: "Plumbing Abbreviations", q: "Which abbreviation describes the portion of the plumbing system responsible for the removal of sewage and greywater?", choices: ["PEX", "DWV", "TPR", "WSFU"], correct: 1, exp: "DWV = Drain, Waste, and Vent. PEX is a supply piping material. TPR = Temperature/Pressure Relief (water heater). WSFU = Water Supply Fixture Unit." },
+    { id: 22, domain: 1, task: 10, topic: "Water Heater TPR", q: "A temperature and pressure relief (TPR) valve on a residential water heater is typically rated to discharge at approximately:", choices: ["30 psi or 150°F", "150 psi or 210°F", "100 psi or 180°F", "75 psi or 200°F"], correct: 1, exp: "TPR valves typically discharge at 150 psi or 210°F — whichever is reached first. Discharge tube must terminate within 6\" of floor, point downward, be same diameter as valve outlet, and never be capped, threaded, or plugged." },
+    { id: 23, domain: 1, task: 10, topic: "Cross-Connection", q: "An air gap between a faucet outlet and the flood-level rim of a fixture must be a minimum of:", choices: ["1 inch or 2x the diameter of the faucet, whichever is greater", "1/2 inch", "2 inches always", "3 inches always"], correct: 0, exp: "Minimum air gap = 1 inch OR 2x the effective opening diameter, whichever is greater. The air gap is the most reliable backflow prevention device." },
+    { id: 24, domain: 1, task: 11, topic: "Spa Access Panel", q: "When inspecting a spa tub, the minimum size requirement for the access panel opening is:", choices: ["24\" x 16\"", "15\" x 21\"", "36\" x 30\"", "12\" x 12\""], correct: 3, exp: "Spa access: 12\"x12\" minimum (18\"x18\" if pump is more than 2' from opening). 24\"x16\" = crawlspace access minimum. 36\"x30\" = guardrail trigger (30\" drop within 36\"). 15\"x21\" = toilet clearances (15\" centerline-to-wall, 21\" front clearance)." },
+    { id: 25, domain: 1, task: 11, topic: "Stairs", q: "The maximum variation between the largest and smallest riser height on a single flight of stairs is:", choices: ["3/8 inch", "1/4 inch", "1/2 inch", "3/4 inch"], correct: 0, exp: "Per IRC, the greatest riser height within a flight of stairs cannot exceed the smallest by more than 3/8\". Same tolerance applies to tread depth. This prevents trips caused by inconsistent steps." },
+    { id: 26, domain: 1, task: 12, topic: "Hearth Extension", q: "The minimum hearth extension in front of a masonry fireplace with an opening 6 sq ft or larger is:", choices: ["12 inches", "16 inches", "20 inches", "24 inches"], correct: 2, exp: "Hearth extension must be at least 20\" in front and 12\" beyond each side of opening for fireboxes ≥ 6 sq ft. For openings < 6 sq ft: 16\" front, 8\" sides. Hearth extension protects against radiant heat and falling embers." },
+    { id: 27, domain: 1, task: 12, topic: "Chimney Height", q: "A chimney must extend at least how high above any portion of a building within 10 feet?", choices: ["1 foot", "2 feet", "3 feet", "4 feet"], correct: 1, exp: "The 3-2-10 rule: chimney must be at least 3 feet above the roof penetration AND at least 2 feet higher than any portion of the building within 10 feet horizontally." },
+    { id: 28, domain: 1, task: 13, topic: "Egress Window", q: "A bedroom egress window must have a minimum net clear opening of:", choices: ["3.0 sq ft", "5.0 sq ft", "5.7 sq ft", "7.0 sq ft"], correct: 2, exp: "5.7 sq ft is the standard minimum for above-grade openings. 5.0 sq ft is allowed for grade-floor openings. Minimum net clear opening height = 24\", width = 20\". Maximum sill height = 44\" above floor." },
+    { id: 29, domain: 1, task: 13, topic: "Smoke Alarms", q: "Smoke alarms in new residential construction are required to be installed in all of the following locations EXCEPT:", choices: ["Each sleeping room", "Outside each sleeping area", "On every level including basement", "In the kitchen near the cooking appliance"], correct: 3, exp: "Smoke alarms are NOT required in kitchens and should be kept away from cooking appliances to prevent nuisance alarms (codes typically require 10' minimum from cooking appliance if installed nearby). Required: each bedroom, outside each sleeping area, every level including basement." },
+    { id: 30, domain: 1, task: 13, topic: "GFCI Locations", q: "GFCI protection is required for all of the following locations EXCEPT:", choices: ["Bathrooms", "Kitchen counter receptacles", "Bedroom receptacles", "Garages"], correct: 2, exp: "GFCI required: bathrooms, kitchen counters, garages, outdoors, crawl spaces, unfinished basements, laundry, near sinks, dishwashers. Bedrooms typically require AFCI protection (not GFCI). The exam tests this distinction." },
+    { id: 31, domain: 1, task: 1, topic: "Retaining Walls", q: "A wall that holds soil or fill and is less than 2 feet tall is often referred to as a:", choices: ["Retaining wall", "Landscape wall", "Knee wall", "Cripple wall"], correct: 1, exp: "Landscape walls are short (typically <2-4') and serve aesthetic/light retention purposes. True retaining walls are taller and require engineering. Knee walls are interior partial-height walls in attics. Cripple walls support the floor above a foundation." },
+    { id: 32, domain: 1, task: 1, topic: "Grade Slope", q: "Grade should slope away from the foundation a minimum of:", choices: ["1 inch over 6 feet", "6 inches over 10 feet", "12 inches over 6 feet", "2 inches over 4 feet"], correct: 1, exp: "Standard requirement: 6\" of fall over the first 10' (5% slope). Hardscape can be 2% (1/4\" per foot). Negative grade or insufficient slope is one of the most common defects in Wisconsin housing stock." },
+    { id: 33, domain: 1, task: 2, topic: "Stucco Layers", q: "The three layers of the traditional stucco coating process are:", choices: ["Moisture barrier, weep screed, drainage plane", "Weep screed, building paper, metal lath", "Scratch, brown, and finish", "Drainage plane, capillary break, building paper"], correct: 2, exp: "Stucco COATING layers: scratch coat (first, scratched for tooth), brown coat (leveling), finish coat (texture/color). The OTHER terms describe the substrate/drainage assembly: building paper (moisture barrier) + weep screed (flashing at base) + metal lath (attachment surface)." },
+    { id: 34, domain: 1, task: 2, topic: "Wood-to-Soil Clearance", q: "What is the minimum clearance to soil for untreated dimensional wood beams?", choices: ["12\"", "18\"", "8\"", "6\""], correct: 0, exp: "Untreated wood: 12\" clearance to soil minimum. This prevents wood-destroying organism damage and moisture wicking. Pressure-treated or naturally durable species (cedar, redwood) have different (typically lower) requirements." },
+    { id: 35, domain: 1, task: 2, topic: "Deck Ledger", q: "A common defect with deck ledger board attachment is:", choices: ["Bolts spaced too far apart", "Use of nails instead of lag bolts or carriage bolts", "Lack of flashing", "All of the above"], correct: 3, exp: "All three are common deck ledger defects. Lack of flashing leads to rim joist rot. Nails alone don't provide pull-out resistance — must use lag bolts or carriage bolts. Bolt spacing must follow span/load tables. Deck collapse failures often trace to ledger attachment." },
+    { id: 36, domain: 1, task: 3, topic: "Asphalt Shingle Slope", q: "Asphalt shingles are generally permitted on roofs with a minimum slope of:", choices: ["1:12", "2:12", "4:12", "6:12"], correct: 1, exp: "Asphalt shingles permitted at 2:12 minimum WITH double underlayment. Standard installation requires 4:12 minimum. Below 2:12, must use a true low-slope roofing system (modified bitumen, EPDM, etc.)." },
+    { id: 37, domain: 1, task: 3, topic: "Ice Barrier", q: "In Wisconsin, an ice barrier underlayment is required to extend from the eave edge to a point at least how far inside the exterior wall line?", choices: ["12 inches", "24 inches", "36 inches", "It is not required in Wisconsin"], correct: 1, exp: "Ice barrier (self-adhering polymer-modified bitumen) required from eave edge to 24\" inside the warm wall line in regions with freezing climate. Wisconsin's freeze-thaw cycles make this essential — failure causes ice dam leaks." },
+    { id: 38, domain: 1, task: 4, topic: "Live Load", q: "What is live load?", choices: ["Water vapor removed from air due to temperature", "Constant downward force from occupants and their belongings", "Constant downward force from building materials and permanent equipment", "Water vapor from breathing, cooking, bathing, and infiltration"], correct: 1, exp: "Live load = occupants + furniture + movable items (transient/variable). Dead load = building materials + permanently affixed equipment (constant). Sensible load = heat-driven moisture. Latent load = humidity-driven moisture." },
+    { id: 39, domain: 1, task: 4, topic: "Anchor Bolts", q: "Which of the following is NOT a typical requirement for anchor bolts (sill plate to foundation)?", choices: ["Maximum 6 feet on center", "Within 12 inches of corners and ends", "Minimum 1/2 inch diameter", "Minimum 3 feet on center"], correct: 3, exp: "Anchor bolt requirements: max 6' on center (NOT 3' minimum), within 12\" of corners/ends/breaks, minimum 1/2\" diameter, embedded 7\" minimum into concrete, with washer/nut. There's no 3-foot minimum spacing." },
+    { id: 40, domain: 1, task: 4, topic: "Pipe Trench Footing", q: "A pipe trench below a footing must be offset from the bottom of the footing a minimum of:", choices: ["60 degrees", "No offset is required", "45 degrees", "6 feet"], correct: 2, exp: "45° rule: any trench/excavation below footing level must stay outside a 45° line drawn from the bottom of the footing. The soil within this cone provides bearing support; disturbing it can cause settlement." },
+    { id: 41, domain: 1, task: 4, topic: "Foundation Cracks", q: "A horizontal crack in a basement wall is most likely caused by:", choices: ["Normal concrete shrinkage", "Foundation settlement", "Lateral earth pressure (hydrostatic or frost)", "Improper concrete mix"], correct: 2, exp: "Horizontal cracks indicate lateral pressure — typically hydrostatic (water) or frost-induced. Vertical cracks are usually shrinkage. Diagonal cracks (especially stair-step in masonry) typically indicate settlement. Horizontal cracks are the most serious — investigate for bowing/displacement." },
+    { id: 42, domain: 2, task: 3, topic: "SOP Reporting", q: "Which of the following is required by the Standards of Practice when describing a defect in a report?", choices: ["A repair cost estimate", "A clear description of the defect and recommendation for action", "The name of a recommended contractor", "A photograph"], correct: 1, exp: "SOP requires description of the defect and a recommendation. Cost estimates are NOT required (and most SOPs prohibit them — that's a contractor's role). Photos are best practice but not always SOP-required. Naming specific contractors is a conflict of interest." },
+    { id: 43, domain: 2, task: 4, topic: "Further Evaluation", q: "When inspecting a fireplace, you should:", choices: ["Light a fire to test draft", "Inspect visible portions and recommend Level 2 chimney inspection if defects suspected", "Open and close the damper, verify smoke chamber, recommend cleaning", "Always recommend rebuilding"], correct: 1, exp: "Home inspection of fireplaces is visible portions only — not Level 1/2/3 chimney inspection. Recommend a CSIA-certified chimney sweep for Level 2 (recommended at every property transfer per NFPA 211). Don't light fires during inspection." },
+    { id: 44, domain: 2, task: 1, topic: "SOP Tools", q: "Which of the following is the home inspector NOT required to use during an inspection?", choices: ["Flashlight", "Moisture meter", "Ladder for accessible areas", "Outlet tester"], correct: 1, exp: "Moisture meters, thermal cameras, and similar specialized tools are NOT required by SOP. Required tools generally include flashlight, ladder for accessible areas, outlet tester. Specialized tools enhance findings but aren't mandatory." },
+    { id: 45, domain: 2, task: 3, topic: "Defect Description", q: "Which of the following is the BEST defect description for a report?", choices: ["The water heater is bad", "Old water heater visible in basement", "Water heater (2003) — TPR discharge tube terminates above floor and is threaded; recommend correction by qualified plumber", "Water heater needs replacement"], correct: 2, exp: "Good defect descriptions are: specific (what), located (where), explained (why it matters), and actionable (recommendation + qualified party). Vague descriptions like 'bad' or 'old' don't satisfy SOP and create liability." },
+    { id: 46, domain: 3, task: 2, topic: "Conflicts of Interest", q: "Inspectors should avoid all of the following EXCEPT:", choices: ["Performing repairs on properties they inspected within the past 24 months", "Accepting referral fees from contractors they recommend", "Recommending qualified specialists for further evaluation", "Inspecting a property they have a financial interest in"], correct: 2, exp: "Recommending qualified specialists for further evaluation is REQUIRED, not avoided. The other three are conflicts of interest prohibited by most state laws and SOPs. Wisconsin specifically prohibits inspectors from performing work on properties they inspected within the past 2 years." },
+    { id: 47, domain: 3, task: 1, topic: "Pre-Inspection Agreement", q: "A pre-inspection agreement should include all of the following EXCEPT:", choices: ["Scope of inspection", "Limitations and exclusions", "Limit of liability", "Guarantee of property condition"], correct: 3, exp: "An inspection is NOT a guarantee or warranty of property condition. Pre-inspection agreements include scope, limitations, exclusions, limits of liability, and dispute resolution. Guaranteeing condition transforms inspection into warranty — major liability exposure." },
+    { id: 48, domain: 3, task: 2, topic: "E&O Insurance", q: "Errors and Omissions (E&O) insurance covers:", choices: ["Bodily injury claims at the inspection site", "Damage to client property during the inspection", "Professional negligence claims based on inspection findings or omissions", "All of the above"], correct: 2, exp: "E&O covers professional negligence — claims that arise from the work product (the inspection and report). Bodily injury and property damage during the inspection are covered by General Liability (GL). Both are typically required. They are NOT the same coverage." },
+    { id: 49, domain: 3, task: 1, topic: "Privacy", q: "When inspecting a property, an inspector should:", choices: ["Photograph everything for liability protection", "Be aware of and avoid capturing personal information, including children, in photos", "Only photograph defects, never general conditions", "Avoid taking any photographs"], correct: 1, exp: "Inspectors must respect occupant privacy. Photograph defects and conditions necessary for the report; avoid people (especially children), personal documents, valuables, and identifiable family items. Some inspectors disclose recording/photography in pre-inspection agreement." },
+    { id: 50, domain: 3, task: 2, topic: "Report Confidentiality", q: "An inspection report is generally:", choices: ["Public record once filed", "The property of the inspector, distributed only with the client's permission", "Required to be shared with the seller", "Required to be shared with the listing agent"], correct: 1, exp: "The report is the inspector's work product; the client owns the right to it. The inspector should not share with seller, listing agent, or anyone else without client's written permission. Some pre-inspection agreements address this explicitly." }
+  ];
+
+  const TASK_NAMES = {
+    "1.1": "Site Conditions", "1.2": "Exterior", "1.3": "Roof", "1.4": "Structure",
+    "1.5": "Electrical", "1.6": "Cooling", "1.7": "Heating", "1.8": "Insulation/Vent",
+    "1.9": "Mech Exhaust", "1.10": "Plumbing", "1.11": "Interior", "1.12": "Fireplaces",
+    "1.13": "Life Safety",
+    "2.1": "Inspection Description", "2.2": "Limitations", "2.3": "Defect Description", "2.4": "Further Evaluation",
+    "3.1": "Pre-Inspection Agreement", "3.2": "Quality/Integrity"
+  };
+
+  const STORAGE_KEY = "nhie_drill_v1_stats";
+  let state = { mode: null, questions: [], currentIdx: 0, answers: [], startTime: null };
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return { byTask: {}, totalAnswered: 0, totalCorrect: 0, sessions: [] };
+  }
+
+  function saveStats(stats) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch(e) {}
+  }
+
+  function recordAnswer(question, isCorrect) {
+    const stats = loadStats();
+    const key = question.domain + "." + question.task;
+    if (!stats.byTask[key]) stats.byTask[key] = { correct: 0, total: 0 };
+    stats.byTask[key].total++;
+    if (isCorrect) stats.byTask[key].correct++;
+    stats.totalAnswered++;
+    if (isCorrect) stats.totalCorrect++;
+    saveStats(stats);
+  }
+
+  function pickQuestions(mode) {
+    const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5);
+    if (mode === "quick10") return shuffled.slice(0, 10);
+    if (mode === "mixed25") return shuffled.slice(0, 25);
+    if (mode === "weak") {
+      const stats = loadStats();
+      const taskAccuracy = {};
+      Object.entries(stats.byTask).forEach(([k, v]) => {
+        taskAccuracy[k] = v.total > 0 ? v.correct / v.total : 0.5;
+      });
+      const scored = shuffled.map(q => {
+        const key = q.domain + "." + q.task;
+        const acc = taskAccuracy[key] !== undefined ? taskAccuracy[key] : 0.5;
+        return { q, acc };
+      }).sort((a, b) => a.acc - b.acc);
+      return scored.slice(0, 15).map(s => s.q);
+    }
+    return shuffled.slice(0, 10);
+  }
+
+  function renderHome() {
+    const stats = loadStats();
+    const overallPct = stats.totalAnswered > 0 ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
+    document.getElementById('stats-bar').innerHTML =
+      '<div class="stat"><div class="lbl">Answered</div><div class="val">' + stats.totalAnswered + '</div></div>' +
+      '<div class="stat"><div class="lbl">Accuracy</div><div class="val">' + (stats.totalAnswered > 0 ? overallPct + '%' : '—') + '</div></div>' +
+      '<div class="stat"><div class="lbl">Bank size</div><div class="val">' + QUESTIONS.length + '</div></div>';
+
+    const gapList = document.getElementById('gap-list');
+    const gaps = Object.entries(stats.byTask)
+      .filter(([k, v]) => v.total >= 2)
+      .map(([k, v]) => ({ key: k, pct: Math.round((v.correct / v.total) * 100), n: v.total }))
+      .sort((a, b) => a.pct - b.pct);
+    if (gaps.length === 0) {
+      gapList.innerHTML = '<div style="font-size:14px; color: var(--text-secondary);">Take a quick drill to start tracking gaps by task area.</div>';
+    } else {
+      let html = '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">Accuracy by task — weakest first</div>';
+      gaps.forEach(g => {
+        const cls = g.pct < 70 ? 'weak' : g.pct < 85 ? 'ok' : 'strong';
+        const name = TASK_NAMES[g.key] || g.key;
+        html += '<div class="gap-row"><span>' + name + ' <span style="color: var(--text-tertiary); font-size: 12px;">(' + g.n + ')</span></span><span class="gap-pct ' + cls + '">' + g.pct + '%</span></div>';
+      });
+      gapList.innerHTML = html;
+    }
+  }
+
+  function showScreen(name) {
+    document.getElementById('screen-home').style.display = name === 'home' ? 'block' : 'none';
+    document.getElementById('screen-quiz').style.display = name === 'quiz' ? 'block' : 'none';
+    document.getElementById('screen-results').style.display = name === 'results' ? 'block' : 'none';
+    if (name === 'home') renderHome();
+    window.scrollTo(0, 0);
+  }
+
+  function renderQuestion() {
+    const q = state.questions[state.currentIdx];
+    const taskName = TASK_NAMES[q.domain + "." + q.task] || q.topic;
+    document.getElementById('progress-text').textContent = 'Question ' + (state.currentIdx + 1) + ' of ' + state.questions.length;
+    document.getElementById('progress-bar-fill').style.width = ((state.currentIdx) / state.questions.length * 100) + '%';
+
+    let html = '<div class="qmeta"><span>' + taskName + ' · ' + q.topic + '</span><span>D' + q.domain + '</span></div>';
+    html += '<div class="qtext">' + q.q + '</div>';
+    q.choices.forEach((c, i) => {
+      html += '<button class="choice" data-idx="' + i + '">' + String.fromCharCode(65 + i) + '. ' + c + '</button>';
+    });
+    html += '<div id="explanation-area"></div>';
+    html += '<div class="controls" id="controls-area"></div>';
+    document.getElementById('question-card').innerHTML = html;
+
+    document.querySelectorAll('.choice').forEach(btn => {
+      btn.addEventListener('click', () => answerQuestion(parseInt(btn.dataset.idx)));
+    });
+  }
+
+  function answerQuestion(choiceIdx) {
+    const q = state.questions[state.currentIdx];
+    const isCorrect = choiceIdx === q.correct;
+    state.answers.push({ question: q, chosen: choiceIdx, correct: isCorrect });
+    recordAnswer(q, isCorrect);
+
+    document.querySelectorAll('.choice').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add('correct');
+      else if (i === choiceIdx) btn.classList.add('wrong');
+    });
+
+    document.getElementById('explanation-area').innerHTML =
+      '<div class="explanation"><div class="label">' + (isCorrect ? 'Correct' : 'Explanation') + '</div>' + q.exp + '</div>';
+
+    const isLast = state.currentIdx === state.questions.length - 1;
+    document.getElementById('controls-area').innerHTML =
+      '<button class="primary" id="next-btn">' + (isLast ? 'See results' : 'Next question →') + '</button>';
+    document.getElementById('next-btn').addEventListener('click', () => {
+      if (isLast) showResults();
+      else { state.currentIdx++; renderQuestion(); }
+    });
+    document.getElementById('progress-bar-fill').style.width = ((state.currentIdx + 1) / state.questions.length * 100) + '%';
+  }
+
+  function showResults() {
+    const total = state.answers.length;
+    const correct = state.answers.filter(a => a.correct).length;
+    const pct = Math.round((correct / total) * 100);
+    const passing = pct >= 72;
+    const elapsed = Math.round((Date.now() - state.startTime) / 1000);
+    const min = Math.floor(elapsed / 60);
+    const sec = elapsed % 60;
+
+    document.getElementById('score-display').className = 'score ' + (passing ? 'pass' : 'fail');
+    document.getElementById('score-display').textContent = pct + '%';
+    document.getElementById('score-breakdown').textContent = correct + ' of ' + total + ' correct · ' + min + 'm ' + sec + 's · ' + (passing ? 'Above NHIE pass threshold' : 'Below NHIE pass threshold');
+
+    const wrongAnswers = state.answers.filter(a => !a.correct);
+    const reviewSection = document.getElementById('review-section');
+    if (wrongAnswers.length === 0) {
+      reviewSection.innerHTML = '<div style="font-size:14px; color: var(--success); margin-bottom:1rem;">Perfect score on this set.</div>';
+    } else {
+      let html = '<div class="review-section-header">Review · ' + wrongAnswers.length + ' missed</div>';
+      wrongAnswers.forEach(a => {
+        html += '<div class="review-item"><div class="q">' + a.question.q + '</div>' +
+          '<div class="a"><strong>Your answer:</strong> ' + a.question.choices[a.chosen] + '</div>' +
+          '<div class="a"><strong>Correct:</strong> ' + a.question.choices[a.question.correct] + '</div></div>';
+      });
+      reviewSection.innerHTML = html;
+    }
+    showScreen('results');
+  }
+
+  function startQuiz(mode) {
+    if (mode === 'reset') {
+      if (confirm('Clear all stats? This cannot be undone.')) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderHome();
+      }
+      return;
+    }
+    state.mode = mode;
+    state.questions = pickQuestions(mode);
+    state.currentIdx = 0;
+    state.answers = [];
+    state.startTime = Date.now();
+    showScreen('quiz');
+    renderQuestion();
+  }
+
+  document.querySelectorAll('.mode-card').forEach(card => {
+    card.addEventListener('click', () => startQuiz(card.dataset.mode));
+  });
+  document.getElementById('back-home').addEventListener('click', () => showScreen('home'));
+
+  renderHome();
+})();
+</script>
+</body>
+</html>
